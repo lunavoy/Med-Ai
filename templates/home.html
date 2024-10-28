@@ -1,14 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="pt-BR">
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Med.Ai - Home</title>
-</head>
-<body>
-    <h1>Sistema de Autenticação</h1>
-    <a href="{{url_for('login')}}">Página de Login</a><br>
-    <a href="{{url_for('register')}}">Página de Cadastro</a><br>
+    <title>MED.ai - Home</title>
+    <!-- Link da biblioteca de ícones Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: url('https://www.terumo.com.br/wp-content/uploads/2023/02/terumo-cardiovascular.jpg') no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        color: #fff;
+      }
 
-</body>
+      .container {
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        font-size: 48px;
+        font-weight: bold;
+        margin-bottom: 40px;
+        color: #333;
+      }
+
+      .header span {
+        color: #00cc99;
+      }
+
+      .menu-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .menu-buttons a {
+        width: 200px;
+        padding: 15px;
+        text-align: center;
+        border-radius: 5px;
+        background-color: #64d79a;
+        text-decoration: none;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .menu-buttons a:hover {
+        background-color: #57c289;
+      }
+
+      .menu-buttons i {
+        font-size: 20px;
+      }
+
+      .menu-buttons .login-btn i {
+        color: #fff;
+      }
+
+      .menu-buttons .register-btn i {
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <span>Med</span>.Ai
+      </div>
+
+      <div class="menu-buttons">
+        <!-- Redireciona para a página de login -->
+        <a href="{{ url_for('login') }}" class="login-btn">
+          <i class="fas fa-sign-in-alt"></i>
+          Login
+        </a>
+
+        <!-- Redireciona para a página de cadastro -->
+        <a href="{{ url_for('register') }}" class="register-btn">
+          <i class="fas fa-user-plus"></i>
+          Register
+        </a>
+      </div>
+    </div>
+  </body>
 </html>

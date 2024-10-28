@@ -1,13 +1,160 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Med.ai - Register</title>
+    <title>Cadastro - MED.ai</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .highlight {
+            color: #64d79a;
+        }
+        input[type="text"], input[type="password"], select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #e6f9eb;
+            color: black;
+            border: 1px solid #64d79a;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #d1f1d8;
+        }
+        a {
+            display: block;
+            margin-top: 10px;
+            color: #64d79a;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .logo {
+            font-size: 30px;
+            color: #64d79a;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        .btn-option {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .btn-option button {
+            padding: 10px 20px;
+            background-color: #64d79a;
+            color: white;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-option button:hover {
+            background-color: #57c289;
+        }
+        .form-section {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        function showForm(type) {
+            document.getElementById('patient-form').style.display = 'none';
+            document.getElementById('doctor-form').style.display = 'none';
+
+            if (type === 'patient') {
+                document.getElementById('patient-form').style.display = 'block';
+            } else if (type === 'doctor') {
+                document.getElementById('doctor-form').style.display = 'block';
+            }
+        }
+    </script>
 </head>
 <body>
-    <h1>Página de Cadastro</h1>
-    <a href="{{url_for('login')}}">Já tem uma conta? Faça login</a><br>
-    <a href="{{url_for('home')}}">Voltar ao Menu Principal</a><br>
+
+    <div class="container">
+        <div class="logo">MED.ai</div>
+        <h2>Cadastro <span class="highlight">de Usuário</span></h2>
+        
+        <!-- Botões para escolha do tipo de cadastro -->
+        <div class="btn-option">
+            <button onclick="showForm('patient')">Sou Paciente</button>
+            <button onclick="showForm('doctor')">Sou Médico</button>
+        </div>
+
+        <!-- Formulário de cadastro para pacientes -->
+        <div id="patient-form" class="form-section">
+            <form action="{{ url_for('register') }}" method="POST">
+                <input type="hidden" name="user_type" value="patient"> <!-- Define que é um paciente -->
+                <input type="text" name="name" placeholder="Nome Completo" required>
+                <input type="text" name="username" placeholder="Usuário" required>
+                <input type="password" name="password" placeholder="Senha" required>
+                <input type="submit" value="Registrar Paciente">
+            </form>
+        </div>
+        
+
+        <!-- Formulário de cadastro para médicos -->
+        <div id="doctor-form" class="form-section">
+            <form action="{{ url_for('register') }}" method="POST">
+                <input type="hidden" name="user_type" value="doctor">
+                <input type="text" name="username" placeholder="Usuário" required>
+                <input type="text" name="name" placeholder="Nome" required>
+                <input type="password" name="password" placeholder="Senha" required>
+                <select name="specialty" required>
+                    <option value="" disabled selected>Escolha sua Especialidade</option>
+                    <option value="Cardiologia">Cardiologia</option>
+                    <option value="Dermatologia">Dermatologia</option>
+                    <option value="Pediatria">Pediatria</option>
+                    <option value="Neurologia">Neurologia</option>
+                    <!-- Outras especialidades podem ser adicionadas aqui -->
+                </select>
+                <input type="text" name="crm" placeholder="CRM" required>
+                <input type="submit" value="Registrar Médico">
+            </form>
+        </div>
+
+        <!-- Links para login e página inicial -->
+        <a href="{{ url_for('login') }}">Já tem uma conta? Faça login</a>
+        <a href="{{ url_for('home') }}">Voltar ao Menu Principal</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
 </body>
 </html>
