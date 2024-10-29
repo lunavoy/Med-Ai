@@ -63,6 +63,13 @@
             font-weight: bold;
             margin-bottom: 30px;
         }
+        .flash {
+            color: red;
+            margin-bottom: 15px;
+        }
+        .flash.success {
+            color: green;
+        }
     </style>
 </head>
 <body>
@@ -71,14 +78,25 @@
         <div class="logo">MED.ai</div>
         <h2>Sign <span class="highlight">In</span></h2>
         
-        <!-- Atualizando a ação para apontar para a rota de login no Flask -->
+        <!-- Bloco para exibir mensagens flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul>
+              {% for category, message in messages %}
+                <li class="flash {{ category }}">{{ message }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Formulário de login -->
         <form action="{{ url_for('login') }}" method="POST">
             <input type="text" name="username" placeholder="Usuário" required>
             <input type="password" name="password" placeholder="Senha" required>
             <input type="submit" value="Entrar">
         </form>
         
-        <!-- Atualizando os links -->
+        <!-- Links para outras páginas -->
         <a href="{{ url_for('register') }}">Crie uma conta</a>
         <a href="{{ url_for('home') }}">Voltar ao Menu Principal</a>
     </div>

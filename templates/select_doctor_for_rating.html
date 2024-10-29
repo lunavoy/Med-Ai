@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selecione um Médico para Avaliar</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .container { margin-top: 50px; padding: 20px; background-color: #f0f0f0; display: inline-block; }
+        .doctor-btn { 
+            display: block; 
+            width: 100%; 
+            padding: 10px 0; 
+            margin: 10px 0; 
+            background-color: #40e0d0; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 10px; 
+            font-size: 18px; 
+            font-weight: bold; 
+        }
+        .doctor-btn:hover { background-color: #20b2aa; }
+    </style>
+</head>
+<body>
+    <h1>Selecione um médico que você se consultou:</h1>
+    <div class="container">
+        {% for appointment in appointments %}
+            <a href="{{ url_for('rate_doctor', doctor_id=appointment.doctor.id) }}" class="doctor-btn">
+                Dr(a). {{ appointment.doctor.name }} - {{ appointment.appointment_date.strftime('%d/%m/%Y') }}
+            </a>
+        {% else %}
+            <p>Nenhum médico disponível para avaliação.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>

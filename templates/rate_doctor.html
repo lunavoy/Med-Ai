@@ -2,119 +2,41 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Avaliar Médico</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            flex-direction: column;
-        }
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            position: relative;
-            width: 300px;
-        }
-        img {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            margin-bottom: 20px;
-        }
-        .rating {
-            margin-bottom: 20px;
-        }
-        .rating button {
-            font-size: 20px;
-            background-color: #64d79a;
-            border: none;
-            color: white;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-radius: 5px;
-            margin: 5px;
-        }
-        .rating button:hover {
-            background-color: #57c68a;
-        }
-        .review {
-            display: none;
-            margin-top: 20px;
-        }
-        textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        input[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            background-color: #64d79a;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #57c68a;
-        }
-        .success {
-            color: green;
-            margin-top: 20px;
-        }
-    </style>
 </head>
 <body>
+    <h1>Avaliar Médico</h1>
 
-    <div class="container">
-        <img src="/static/images/doctor.jpg" alt="Foto do Médico">
-        <h2>Avalie o Médico</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul>
+        {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
 
-        <form action="{{ url_for('rate_doctor', doctor_id=doctor_id) }}" method="POST">
-            <div class="rating">
-                <button type="button" onclick="selectRating(1)">1</button>
-                <button type="button" onclick="selectRating(2)">2</button>
-                <button type="button" onclick="selectRating(3)">3</button>
-                <button type="button" onclick="selectRating(4)">4</button>
-                <button type="button" onclick="selectRating(5)">5</button>
-            </div>
+    <form method="POST">
+        <label for="doctor_id">Médico:</label>
+        <select name="doctor_id" id="doctor_id" required>
+            {% for doctor in doctors %}
+                <option value="{{ doctor.id }}">{{ doctor.name }}</option>
+            {% endfor %}
+        </select>
+        <br><br>
 
-            <input type="hidden" id="rating" name="rating" required>
+        <label for="rating">Avaliação (1 a 5):</label>
+        <input type="number" name="rating" id="rating" min="1" max="5" required>
+        <br><br>
 
-            <div class="review">
-                <textarea name="review" placeholder="Deixe sua opinião (opcional)"></textarea>
-            </div>
+        <label for="review">Comentário:</label>
+        <textarea name="review" id="review" maxlength="500"></textarea>
+        <br><br>
 
-            <input type="submit" value="Enviar Avaliação">
-        </form>
+        <button type="submit">Enviar Avaliação</button>
+    </form>
 
-        <!-- Exibe mensagens de sucesso ou erro -->
-        {% with messages = get_flashed_messages(with_categories=True) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-    </div>
-
-    <script>
-        function selectRating(rating) {
-            document.getElementById('rating').value = rating;
-            document.querySelector('.review').style.display = 'block';
-        }
-    </script>
-
+    <a href="{{ url_for('menu') }}">Voltar ao Menu</a>
 </body>
 </html>
