@@ -4,79 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Avaliar Médico</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> <!-- Link para o CSS padrão -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f9f9f9; /* Cor de fundo do app */
+            background-color: #f9f9f9;
             margin: 0;
             padding: 20px;
         }
 
         h1 {
-            color: #333; /* Cor do título */
+            color: #333;
             text-align: center;
         }
 
+        .doctor-name {
+            text-align: center;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
         form {
-            background-color: #fff; /* Cor de fundo do formulário */
-            border: 1px solid #ccc; /* Borda do formulário */
+            background-color: #fff;
+            border: 1px solid #ccc;
             border-radius: 8px;
             padding: 20px;
             max-width: 400px;
-            margin: 0 auto; /* Centraliza o formulário */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra para o formulário */
+            margin: 0 auto;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         label {
-            display: block; /* Faz os labels ocuparem toda a largura */
-            margin: 10px 0 5px; /* Margem superior e inferior */
+            display: block;
+            margin: 10px 0 5px;
         }
 
         input[type="number"],
-        textarea,
-        select {
-            width: 100%; /* Largura total */
+        textarea {
+            width: 100%;
             padding: 10px;
-            border: 1px solid #ccc; /* Borda */
-            border-radius: 4px; /* Bordas arredondadas */
-            box-sizing: border-box; /* Inclui padding e border na largura total */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
         }
 
         button {
-            background-color: #007BFF; /* Cor de fundo do botão */
-            color: white; /* Cor do texto do botão */
-            border: none; /* Sem borda */
-            border-radius: 4px; /* Bordas arredondadas */
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
             padding: 10px;
-            cursor: pointer; /* Cursor em forma de mão */
-            width: 100%; /* Largura total */
+            cursor: pointer;
+            width: 100%;
         }
 
         button:hover {
-            background-color: #0056b3; /* Cor do botão ao passar o mouse */
+            background-color: #0056b3;
         }
 
         .message {
-            color: #d9534f; /* Cor das mensagens */
-            text-align: center; /* Centraliza as mensagens */
+            color: #d9534f;
+            text-align: center;
         }
 
         a {
-            display: block; /* Faz os links ocuparem toda a largura */
-            text-align: center; /* Centraliza o link */
-            margin-top: 20px; /* Margem superior */
-            color: #007BFF; /* Cor do link */
-            text-decoration: none; /* Remove o sublinhado */
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #007BFF;
+            text-decoration: none;
         }
 
         a:hover {
-            text-decoration: underline; /* Sublinha ao passar o mouse */
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <h1>Avaliar Médico</h1>
+    <div class="doctor-name">Dr. {{ doctor.name }}</div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -89,13 +95,6 @@
     {% endwith %}
 
     <form method="POST">
-        <label for="doctor_id">Médico:</label>
-        <select name="doctor_id" id="doctor_id" required>
-            {% for doctor in doctors %}
-                <option value="{{ doctor.id }}">{{ doctor.name }}</option>
-            {% endfor %}
-        </select>
-
         <label for="rating">Avaliação (1 a 5):</label>
         <input type="number" name="rating" id="rating" min="1" max="5" required>
 
@@ -108,3 +107,4 @@
     <a href="{{ url_for('menu') }}">Voltar ao Menu</a>
 </body>
 </html>
+
