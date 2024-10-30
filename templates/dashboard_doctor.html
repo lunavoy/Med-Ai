@@ -4,48 +4,128 @@
     <meta charset="UTF-8">
     <title>Dashboard Médico</title>
     <style>
-        /* Estilos básicos para layout */
-        .container { display: flex; padding: 20px; }
-        .left, .right { width: 50%; padding: 10px; }
-        .doctor-btn { display: block; background-color: #4ecdc4; color: black; padding: 10px; margin: 10px 0; text-align: center; }
-        .profile { text-align: center; }
-        .profile img { border-radius: 50%; width: 100px; }
+        :root {
+            --primary-color: #64d79a;
+            --secondary-color: #57c289;
+            --background-color: #f4f4f4;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Para alinhar o conteúdo no topo */
+            height: auto; /* Remove a altura fixa */
+            margin: 0;
+            padding: 20px; /* Adiciona algum espaço ao redor do conteúdo */
+        }
+
+        .container {
+            background: var(--primary-color);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 80%; /* Aumenta a largura do container */
+            max-width: 1200px; /* Limita a largura máxima */
+            display: flex;
+            justify-content: space-between; /* Espaça as seções esquerda e direita */
+        }
+
+        h1 {
+            font-size: 36px; /* Tamanho do título principal */
+            color: var(--text-color);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 24px; /* Tamanho dos subtítulos */
+            color: var(--text-color);
+            margin: 20px 0 10px;
+        }
+
+        .left, .right {
+            width: 48%; /* Espaçamento entre as seções */
+        }
+
+        .doctor-btn {
+            display: block;
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .doctor-btn:hover {
+            background-color: darken(var(--secondary-color), 10%); /* Escurece a cor no hover */
+        }
+
+        .profile {
+            text-align: center;
+        }
+
+        .profile img {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px; /* Define a altura da imagem para manter o formato */
+            object-fit: cover; /* Mantém a proporção da imagem */
+        }
+
+        .review {
+            background-color: #ddd; /* Fundo das avaliações */
+            padding: 10px;
+            border-radius: 10px; /* Arredonda os cantos */
+            margin-bottom: 10px; /* Espaço entre as avaliações */
+        }
     </style>
 </head>
 <body>
-    <h1>Med.Ai</h1>
-    <div class="container">
-        <!-- Sessão da esquerda com consultas e avaliações -->
-        <div class="left">
-            <h2>Próximas consultas</h2>
-            <div style="background-color: #ddd; padding: 10px;">
-                {% for appointment in appointments %}
-                    <a href="#" class="doctor-btn">
-                        {{ appointment.patient_name }} - {{ appointment.date.strftime('%d/%m/%Y') }}
-                    </a>
-                {% endfor %}
-            </div>
-            
-            <h2>Suas últimas avaliações</h2>
-            <div style="background-color: #ddd; padding: 10px;">
-                {% for review in reviews %}
-                    <div class="doctor-btn">{{ review.patient_name }} - {{ review.date.strftime('%d/%m/%Y') }}</div>
-                    <div class="doctor-btn">{{ review.comment }}</div>
-                    <div class="doctor-btn">{{ review.rating }} ★</div>
-                {% endfor %}
-            </div>
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+        <div style="text-align: center;">
+                <h1 style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 60px;">Med.Ai</h1>
         </div>
+        <div class="container">
+            <div class="left">
+                <h2>Próximas consultas</h2>
+                <div class="menu-buttons">
+                    {% for appointment in appointments %}
+                        <a href="#" class="doctor-btn">
+                            {{ appointment.appointment_date.strftime('%d/%m/%Y') }}
+                        </a>
+                    {% endfor %}
+                </div>
+                
+                <h2>Suas últimas avaliações</h2>
+                <div class="menu-buttons">
+                    {% for review in reviews %}
+                        <div class="review">
+                            <strong>{{ review.patient_name }}</strong>
+                            <div>{{ review.comment }}</div>
+                            <div>{{ review.rating }} ★</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
 
-        <!-- Sessão da direita com perfil e média de notas -->
-        <div class="right">
-            <div class="profile">
-                {% if doctor.profile_image %}
-                    <img src="{{ url_for('static', filename='profile_images/' + doctor.profile_image) }}" alt="Foto de Perfil">
-                {% else %}
-                    <img src="{{ url_for('static', filename='profile_images/default.png') }}" alt="Foto de Perfil">
-                {% endif %}
-                <h3>Olá, Dr. {{ doctor.name }}!</h3>
-                <p>Sua nota atual: {{ average_rating or "N/A" }} ★</p>
+            <!-- Sessão da direita com perfil e média de notas -->
+            <div class="right">
+                <div class="profile">
+                    {% if doctor.profile_image %}
+                        <img src="{{ url_for('static', filename='profile_images/' + doctor.profile_image) }}" alt="Foto de Perfil">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='profile_images/default.png') }}" alt="Foto de Perfil">
+                    {% endif %}
+                    <h3>Olá, Dr. {{ doctor.name }}!</h3>
+                    <p>Sua nota atual: {{ average_rating or "N/A" }} ★</p>
+                </div>
             </div>
         </div>
     </div>

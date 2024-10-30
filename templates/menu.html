@@ -5,9 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MED.ai Menu</title>
     <style>
+      :root {
+        --primary-color: #64d79a;
+        --secondary-color: #57c289;
+        --background-color: #f4f4f4;
+        --text-color: #333;
+      }
+
       body {
         font-family: Arial, sans-serif;
-        background-color: #fff;
+        background: var(--background-color);
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -19,20 +26,22 @@
       .header {
         font-size: 36px;
         font-weight: bold;
-        margin-bottom: 50px;
+        margin-bottom: 30px;
+        color: var(--text-color);
       }
 
       .header span {
-        color: #00cc99;
+        color: var(--primary-color);
       }
 
       .welcome-text {
         font-size: 24px;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
+        color: var(--text-color);
       }
 
       .welcome-text span {
-        color: #00cc99;
+        color: var(--primary-color);
       }
 
       .menu-buttons {
@@ -43,32 +52,39 @@
 
       .menu-buttons button {
         width: 200px;
-        padding: 10px;
-        border: 1px solid #ccc;
+        padding: 15px;
+        border: none;
         border-radius: 5px;
-        background-color: #ccffdd;
+        background-color: var(--secondary-color);
         cursor: pointer;
         font-size: 16px;
-        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+        font-weight: bold;
+        color: white;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease;
       }
 
       .menu-buttons button:hover {
-        background-color: #b3ffcc;
+        background-color: #45b580; /* Cor para o hover */
       }
     </style>
   </head>
   <body>
     <div class="header">
       <span>M</span>ED.ai
-      <div class="menu-buttons">
-        <!-- Botão de Marcar Consulta -->
-        <button onclick="location.href='{{ url_for('select_doctor') }}'">Marcar consulta</button>
-    
-        <!-- Botão de Opinar sobre Médico -->
-        <button onclick="location.href='{{ url_for('select_doctor_for_rating')}}'">Opinar sobre Médico</button>
-    
-        <!-- Botão de Logout -->
-        <button onclick="location.href='{{ url_for('logout') }}'">Log Out</button>
-    </div>    
+    </div>
+    <div class="welcome-text">
+      Olá, <span>{{ current_user.name }}</span>! Selecione uma opção abaixo:
+    </div>
+    <div class="menu-buttons">
+      <!-- Botão de Marcar Consulta -->
+      <button onclick="location.href='{{ url_for('select_doctor') }}'">Marcar consulta</button>
+  
+      <!-- Botão de Opinar sobre Médico -->
+      <button onclick="location.href='{{ url_for('select_doctor_for_rating')}}'">Opinar sobre Médico</button>
+  
+      <!-- Botão de Logout -->
+      <button onclick="location.href='{{ url_for('logout') }}'">Log Out</button>
+    </div>
   </body>
 </html>

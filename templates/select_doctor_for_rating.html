@@ -5,21 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Selecione um Médico para Avaliar</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .container { margin-top: 50px; padding: 20px; background-color: #f0f0f0; display: inline-block; }
+        :root {
+            --primary-color: #40e0d0;
+            --hover-color: #20b2aa;
+            --background-color: #f0f0f0;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #fff; /* Fundo branco para melhor contraste */
+            margin: 0; /* Remove margens padrão */
+            padding: 20px; /* Adiciona preenchimento ao redor */
+        }
+
+        h1 {
+            margin-top: 50px;
+            color: var(--text-color);
+            font-size: 24px;
+        }
+
+        .container {
+            margin-top: 20px; /* Espaçamento adicional acima do contêiner */
+            padding: 20px;
+            background-color: var(--background-color);
+            display: inline-block;
+            border-radius: 8px; /* Cantos arredondados */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Sombra suave */
+        }
+
         .doctor-btn { 
             display: block; 
             width: 100%; 
             padding: 10px 0; 
             margin: 10px 0; 
-            background-color: #40e0d0; 
+            background-color: var(--primary-color); 
             color: white; 
             text-decoration: none; 
             border-radius: 10px; 
             font-size: 18px; 
             font-weight: bold; 
+            transition: background-color 0.3s; /* Efeito de transição suave */
         }
-        .doctor-btn:hover { background-color: #20b2aa; }
+
+        .doctor-btn:hover { 
+            background-color: var(--hover-color); 
+        }
+
+        .appointments-container {
+            max-width: 400px; /* Largura máxima para os botões */
+            margin: 0 auto; /* Centraliza o contêiner */
+        }
     </style>
 </head>
 <body>

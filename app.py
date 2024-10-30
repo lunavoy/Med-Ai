@@ -9,7 +9,6 @@ from werkzeug.utils import secure_filename
 import os
 import datetime
 
-
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'thisisasecretkey'
@@ -59,42 +58,51 @@ class DoctorRating(db.Model):
     review = db.Column(db.String(500), nullable=True)
 
 with app.app_context():
-    db.create_all() # Doctor.__table__.drop(db.engine)
+   db.create_all()
+    #db.create_all() # Doctor.__table__.drop(db.engine)
 #------------------------------------------------------------------------------ROTAS(URL)-----------------------------------------------------------------------
 @app.route('/') #Página Inicial
 def home():
     return render_template('home.html')
+@login_manager.user_loader # Função que carrega o usuário baseado no ID
+def load_user(user_id):
+    user = User.query.get(int(user_id))
+    if user is not None:
+        return user
 
-from flask import request, redirect, url_for, flash, render_template
-from flask_login import login_user
-from werkzeug.security import check_password_hash
-
+    doctor = Doctor.query.get(int(user_id))
+    if doctor is not None:
+        return doctor  
+    return None
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         
-        # Primeiro, tenta encontrar o usuário como paciente
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
             login_user(user)
+            session['user_type'] = 'patient'
             return redirect(url_for('menu'))
-
-        # Se não for paciente, tenta encontrar o usuário como médico
+        
         doctor = Doctor.query.filter_by(username=username).first()
         if doctor and check_password_hash(doctor.password, password):
             login_user(doctor)
+            session['user_type'] = 'doctor'
             return redirect(url_for('dashboard_doctor'))
-        
-        # Se nenhum dos dois for encontrado ou a senha estiver incorreta
-        flash("Username ou senha incorretos.")
-        
+        else:
+            flash("Username ou senha incorretos.")
+
+    if session.get('user_type') == 'patient':
+        print("Logged-in user is a patient")
+    elif session.get('user_type') == 'doctor':
+        print("Logged-in user is a doctor")
     return render_template('login.html')
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        user_type = request.form.get('user_type')  # Verifica se é paciente ou médico
         username = request.form.get('username')
         name = request.form.get('name')
         password = request.form.get('password')
@@ -102,7 +110,7 @@ def register():
         if not username or not name or not password:
             flash("Todos os campos são obrigatórios.")
             return redirect(url_for('register'))
-        
+
         # Verificação de existência de username em ambas as tabelas
         existing_user = User.query.filter_by(username=username).first()
         existing_doctor = Doctor.query.filter_by(username=username).first()
@@ -110,7 +118,9 @@ def register():
         if existing_user or existing_doctor:
             flash('O nome de usuário já está em uso. Tente outro.')
             return redirect(url_for('register'))
-        
+
+        user_type = request.form.get('user_type')  # Verifica se é paciente ou médico
+
         if user_type == 'patient':
             hashed_password = generate_password_hash(password)
             new_user = User(username=username, name=name, password=hashed_password)
@@ -161,27 +171,19 @@ def menu():
     # Caso seja um paciente, renderiza o menu
     return render_template('menu.html')
         
-@app.route('/dashboard_doctor')
+@app.route('/dashboard_doctor', endpoint='dashboard_doctor')
 @login_required
 def dashboard_doctor():
     if not isinstance(current_user, Doctor):
-        print(current_user) # Restrição de acesso a médicos
-        abort(403)  # Proibido
+        abort(403)
 
-    # Carrega as próximas consultas
     upcoming_appointments = Appointment.query.filter(
         Appointment.doctor_id == current_user.id,
         Appointment.appointment_date >= datetime.date.today()
     ).order_by(Appointment.appointment_date).all()
 
-    # Calcula a média de avaliações
     ratings = DoctorRating.query.filter_by(doctor_id=current_user.id).all()
-    if ratings:
-        average_rating = sum(r.rating for r in ratings) / len(ratings)
-    else:
-        average_rating = None
-
-    # Carrega as últimas avaliações
+    average_rating = sum(r.rating for r in ratings) / len(ratings) if ratings else None
     latest_reviews = DoctorRating.query.filter_by(doctor_id=current_user.id).order_by(DoctorRating.id.desc()).limit(5).all()
 
     return render_template(
@@ -346,16 +348,6 @@ def check_data():
         data.append({table.name: table_data})
     return jsonify(data)
 
-# Função que carrega o usuário baseado no ID
-@login_manager.user_loader
-def load_user(user_id):
-    # Carrega tanto usuários quanto médicos pelo ID
-    user = User.query.get(int(user_id))
-    if user is not None:
-        return user  # Retorna o usuário se encontrado
-
-    doctor = Doctor.query.get(int(user_id))
-    return doctor  # Retorna o médico se encontrado ou None se nenhum for encontrado
 
 
 if __name__ == '__main__':
