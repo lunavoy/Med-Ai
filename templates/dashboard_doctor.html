@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Médico</title>
+    <style>
+        /* Estilos básicos para layout */
+        .container { display: flex; padding: 20px; }
+        .left, .right { width: 50%; padding: 10px; }
+        .doctor-btn { display: block; background-color: #4ecdc4; color: black; padding: 10px; margin: 10px 0; text-align: center; }
+        .profile { text-align: center; }
+        .profile img { border-radius: 50%; width: 100px; }
+    </style>
+</head>
+<body>
+    <h1>Med.Ai</h1>
+    <div class="container">
+        <!-- Sessão da esquerda com consultas e avaliações -->
+        <div class="left">
+            <h2>Próximas consultas</h2>
+            <div style="background-color: #ddd; padding: 10px;">
+                {% for appointment in appointments %}
+                    <a href="#" class="doctor-btn">
+                        {{ appointment.patient_name }} - {{ appointment.date.strftime('%d/%m/%Y') }}
+                    </a>
+                {% endfor %}
+            </div>
+            
+            <h2>Suas últimas avaliações</h2>
+            <div style="background-color: #ddd; padding: 10px;">
+                {% for review in reviews %}
+                    <div class="doctor-btn">{{ review.patient_name }} - {{ review.date.strftime('%d/%m/%Y') }}</div>
+                    <div class="doctor-btn">{{ review.comment }}</div>
+                    <div class="doctor-btn">{{ review.rating }} ★</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Sessão da direita com perfil e média de notas -->
+        <div class="right">
+            <div class="profile">
+                {% if doctor.profile_image %}
+                    <img src="{{ url_for('static', filename='profile_images/' + doctor.profile_image) }}" alt="Foto de Perfil">
+                {% else %}
+                    <img src="{{ url_for('static', filename='profile_images/default.png') }}" alt="Foto de Perfil">
+                {% endif %}
+                <h3>Olá, Dr. {{ doctor.name }}!</h3>
+                <p>Sua nota atual: {{ average_rating or "N/A" }} ★</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

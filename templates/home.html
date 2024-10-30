@@ -4,41 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MED.ai - Home</title>
-    <!-- Link da biblioteca de ícones Font Awesome -->
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
       rel="stylesheet"
     />
     <style>
+      :root {
+        --primary-color: #64d79a;
+        --secondary-color: #57c289;
+        --background-color: #f4f4f4;
+        --text-color: #333;
+      }
+
       body {
         font-family: Arial, sans-serif;
-        background: url('https://www.terumo.com.br/wp-content/uploads/2023/02/terumo-cardiovascular.jpg') no-repeat center center fixed;
-        background-size: cover;
+        background: var(--background-color);
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
         margin: 0;
-        color: #fff;
       }
 
       .container {
-        background-color: rgba(255, 255, 255, 0.9);
+        background: var(--primary-color);
         padding: 30px;
         border-radius: 15px;
         text-align: center;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        width: 300px;
       }
 
       .header {
         font-size: 48px;
         font-weight: bold;
         margin-bottom: 40px;
-        color: #333;
+        color: var(--text-color);
       }
 
       .header span {
-        color: #00cc99;
+        color: var(--secondary-color);
       }
 
       .menu-buttons {
@@ -48,11 +53,11 @@
       }
 
       .menu-buttons a {
-        width: 200px;
+        width: 100%;
         padding: 15px;
         text-align: center;
         border-radius: 5px;
-        background-color: #64d79a;
+        background-color: var(--secondary-color);
         text-decoration: none;
         color: white;
         font-size: 18px;
@@ -65,7 +70,7 @@
       }
 
       .menu-buttons a:hover {
-        background-color: #57c289;
+        background-color: var(--primary-color);
       }
 
       .menu-buttons i {
@@ -73,11 +78,11 @@
       }
 
       .menu-buttons .login-btn i {
-        color: #fff;
+        color: white;
       }
 
       .menu-buttons .register-btn i {
-        color: #fff;
+        color: white;
       }
     </style>
   </head>
@@ -103,3 +108,4 @@
     </div>
   </body>
 </html>
+

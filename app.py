@@ -1,10 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
-from datetime import datetime, date
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy import Column, String
+from sqlalchemy import Column, Integer, Date, ForeignKey
+from sqlalchemy.orm import relationship
 from flask_migrate import Migrate
+from werkzeug.utils import secure_filename
+import os
+import datetime
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -29,15 +33,23 @@ class Doctor(db.Model, UserMixin):
     specialty = db.Column(db.String(30), nullable=False)
     crm = db.Column(db.String(6), nullable=False)
     estado = db.Column(db.String(30), nullable=False, default="")
+    pfp = db.Column(db.String(100), nullable=True)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
     
 class Appointment(db.Model):
+    __tablename__ = 'appointment'
+    
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
-    appointment_date = db.Column(db.Date, nullable=False, unique=True)
+    appointment_date = db.Column(db.Date, nullable=False)
 
     user = db.relationship('User', backref='appointments')
     doctor = db.relationship('Doctor', backref='appointments')
+
+    __table_args__ = (db.UniqueConstraint('doctor_id', 'appointment_date', name='_appointment_date_doctor_id_uc'),)
 
 class DoctorRating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -47,7 +59,7 @@ class DoctorRating(db.Model):
     review = db.Column(db.String(500), nullable=True)
 
 with app.app_context():
-    db.create_all()
+    db.create_all() # Doctor.__table__.drop(db.engine)
 #------------------------------------------------------------------------------ROTAS(URL)-----------------------------------------------------------------------
 @app.route('/') #Página Inicial
 def home():
@@ -56,25 +68,24 @@ def home():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        user = User.query.filter_by(username=username).first() # Verifica se o usuário é paciente
-        if user and check_password_hash(user.password, password):
-            login_user(user)
-            flash('Login realizado com sucesso!', 'success')
-            return redirect(url_for('menu'))
-
-        # Se não for paciente, verifica se é médico
+        username = request.form['username']
+        password = request.form['password']
+        
         doctor = Doctor.query.filter_by(username=username).first()
         if doctor and check_password_hash(doctor.password, password):
             login_user(doctor)
-            flash('Login realizado com sucesso!', 'success')
+            print("Redirecionando para o dashboard do médico")
+            return redirect(url_for('dashboard_doctor'))
+
+        user = User.query.filter_by(username=username).first()
+        if user and check_password_hash(user.password, password):
+            login_user(user)
+            print("Redirecionando para o dashboard do paciente")
             return redirect(url_for('menu'))
-
-        # Mensagem de erro para usuário ou senha incorretos
-        flash('Usuário ou senha incorretos. Tente novamente.', 'error')
-
+        
+        flash("Username ou senha incorretos.")
     return render_template('login.html')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -132,6 +143,37 @@ def logout():
 def menu():
     return render_template('menu.html')
 
+@app.route('/dashboard_doctor')
+@login_required
+def dashboard_doctor():
+    if not isinstance(current_user, Doctor):
+        return redirect(url_for('menu'))
+
+    # Carrega próximas consultas
+    upcoming_appointments = Appointment.query.filter(
+        Appointment.doctor_id == current_user.id,
+        Appointment.appointment_datedate >= datetime.today()
+    ).order_by(Appointment.appointment_datedate).all()
+
+    # Calcula a média de notas
+    ratings = DoctorRating.query.filter_by(doctor_id=current_user.id).all()
+    if ratings:
+        average_rating = sum(r.rating for r in ratings) / len(ratings)
+    else:
+        average_rating = None
+
+    # Carrega últimas avaliações
+    latest_reviews = DoctorRating.query.filter_by(doctor_id=current_user.id).order_by(DoctorRating.date.desc()).limit(5).all()
+
+    return render_template(
+        'dashboard_doctor.html', 
+        doctor=current_user, 
+        appointments=upcoming_appointments, 
+        average_rating=average_rating, 
+        reviews=latest_reviews
+    )
+
+
 @app.route('/schedule_appointment/<int:doctor_id>', methods=['GET', 'POST'])
 @login_required  # O paciente precisa estar logado
 def schedule_appointment(doctor_id):
@@ -185,13 +227,14 @@ def select_doctor():
 @app.route('/select-doctor-for-rating')
 @login_required
 def select_doctor_for_rating():
-    appointments = (Appointment.query
-                    .join(Doctor, Appointment.doctor_id == Doctor.id)
-                    .filter(Appointment.user_id == current_user.id, Appointment.appointment_date <= date.today())
-                    .all())
-
+    user_id = current_user.id
+    # Busque consultas anteriores ou na data atual feitas pelo usuário
+    appointments = Appointment.query.filter(
+        Appointment.user_id == user_id,
+        Appointment.appointment_date <= datetime.date.today()
+    ).all()
+    
     return render_template('select_doctor_for_rating.html', appointments=appointments)
-
 @app.route('/rate-doctor', methods=['GET', 'POST'])
 def rate_doctor():
     if request.method == 'POST':
@@ -220,6 +263,24 @@ def rate_doctor():
     doctors = Doctor.query.all()  # Lista de médicos para o dropdown
     return render_template('rate_doctor.html', doctors=doctors)
 
+@app.route('/upload_profile_image', methods=['POST'])
+@login_required
+def upload_profile_image():
+    if not isinstance(current_user, Doctor):
+        return redirect(url_for('menu'))
+
+    if 'profile_image' in request.files:
+        file = request.files['profile_image']
+        if file.filename != '':
+            filename = secure_filename(file.filename)
+            filepath = os.path.join('static/profile_images', filename)
+            file.save(filepath)
+            current_user.profile_image = filename
+            db.session.commit()
+            flash("Imagem de perfil atualizada com sucesso.")
+    
+    return redirect(url_for('dashboard_doctor'))
+
 
 @app.route('/check-data', methods=['GET'])
 def check_data():
@@ -235,8 +296,14 @@ def check_data():
 # Função que carrega o usuário baseado no ID
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id)) or Doctor.query.get(int(user_id))
+    # Carrega tanto usuários quanto médicos pelo ID
+    user = User.query.get(int(user_id))
+    if not user:
+        user = Doctor.query.get(int(user_id))
+    return user
+
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 

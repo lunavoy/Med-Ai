@@ -24,13 +24,11 @@
 </head>
 <body>
     <h1>Selecione um médico que você se consultou:</h1>
-    <div class="container">
+    <div class="appointments-container">
         {% for appointment in appointments %}
             <a href="{{ url_for('rate_doctor', doctor_id=appointment.doctor.id) }}" class="doctor-btn">
-                Dr(a). {{ appointment.doctor.name }} - {{ appointment.appointment_date.strftime('%d/%m/%Y') }}
+                {{ appointment.doctor.name }} - {{ appointment.appointment_date.strftime('%d/%m/%Y') }}
             </a>
-        {% else %}
-            <p>Nenhum médico disponível para avaliação.</p>
         {% endfor %}
     </div>
 </body>

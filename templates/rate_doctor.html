@@ -2,7 +2,78 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Avaliar Médico</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> <!-- Link para o CSS padrão -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9; /* Cor de fundo do app */
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333; /* Cor do título */
+            text-align: center;
+        }
+
+        form {
+            background-color: #fff; /* Cor de fundo do formulário */
+            border: 1px solid #ccc; /* Borda do formulário */
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto; /* Centraliza o formulário */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra para o formulário */
+        }
+
+        label {
+            display: block; /* Faz os labels ocuparem toda a largura */
+            margin: 10px 0 5px; /* Margem superior e inferior */
+        }
+
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%; /* Largura total */
+            padding: 10px;
+            border: 1px solid #ccc; /* Borda */
+            border-radius: 4px; /* Bordas arredondadas */
+            box-sizing: border-box; /* Inclui padding e border na largura total */
+        }
+
+        button {
+            background-color: #007BFF; /* Cor de fundo do botão */
+            color: white; /* Cor do texto do botão */
+            border: none; /* Sem borda */
+            border-radius: 4px; /* Bordas arredondadas */
+            padding: 10px;
+            cursor: pointer; /* Cursor em forma de mão */
+            width: 100%; /* Largura total */
+        }
+
+        button:hover {
+            background-color: #0056b3; /* Cor do botão ao passar o mouse */
+        }
+
+        .message {
+            color: #d9534f; /* Cor das mensagens */
+            text-align: center; /* Centraliza as mensagens */
+        }
+
+        a {
+            display: block; /* Faz os links ocuparem toda a largura */
+            text-align: center; /* Centraliza o link */
+            margin-top: 20px; /* Margem superior */
+            color: #007BFF; /* Cor do link */
+            text-decoration: none; /* Remove o sublinhado */
+        }
+
+        a:hover {
+            text-decoration: underline; /* Sublinha ao passar o mouse */
+        }
+    </style>
 </head>
 <body>
     <h1>Avaliar Médico</h1>
@@ -24,15 +95,12 @@
                 <option value="{{ doctor.id }}">{{ doctor.name }}</option>
             {% endfor %}
         </select>
-        <br><br>
 
         <label for="rating">Avaliação (1 a 5):</label>
         <input type="number" name="rating" id="rating" min="1" max="5" required>
-        <br><br>
 
         <label for="review">Comentário:</label>
         <textarea name="review" id="review" maxlength="500"></textarea>
-        <br><br>
 
         <button type="submit">Enviar Avaliação</button>
     </form>
