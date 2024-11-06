@@ -54,11 +54,6 @@ class DoctorRating(db.Model):
 with app.app_context():
    db.create_all()
     #db.create_all() # Doctor.__table__.drop(db.engine)
-
-from datetime import datetime
-
-# Add the new appointment dates and times to the database
-
 #------------------------------------------------------------------------------ROTAS(URL)-----------------------------------------------------------------------
 @login_manager.user_loader
 def load_user(user_id):
