@@ -98,7 +98,7 @@
                 <div class="menu-buttons">
                     {% for appointment in appointments %}
                         <a href="#" class="doctor-btn">
-                            {{ appointment.appointment_date.strftime('%d/%m/%Y') }}
+                            {{ appointment.appointment_datetime.strftime('%d/%m/%Y %H:%M') }}
                         </a>
                     {% endfor %}
                 </div>
@@ -125,9 +125,11 @@
                     {% endif %}
                     <h3>Olá, Dr. {{ doctor.name }}!</h3>
                     <p>Sua nota atual: {{ average_rating or "N/A" }} ★</p>
+                    <a href="{{ url_for('logout') }}" class="doctor-btn">Sair (Logout)</a>
                 </div>
             </div>
         </div>
     </div>
 </body>
 </html>
+

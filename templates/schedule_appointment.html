@@ -27,79 +27,146 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            width: 320px;
             text-align: center;
         }
 
         h2 {
             font-size: 24px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             color: var(--text-color);
         }
 
-        input[type="date"], input[type="submit"] {
+        .doctor-name {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+            color: var(--text-color);
+        }
+
+        input[type="date"] {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 4px;
-            box-sizing: border-box; /* Inclui padding e border no tamanho total */
+            box-sizing: border-box;
+        }
+
+        .time-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .time-option {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .time-option:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .confirmation {
+            margin-top: 20px;
+            font-size: 16px;
+            color: var(--text-color);
+            display: none;
         }
 
         input[type="submit"] {
             background-color: var(--primary-color);
             color: white;
+            padding: 10px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
+            width: 100%;
         }
 
         input[type="submit"]:hover {
             background-color: var(--secondary-color);
-        }
-
-        .flash {
-            color: #d9534f; /* Cor para mensagens de erro */
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        .flash.success {
-            color: #5cb85c; /* Cor para mensagens de sucesso */
-        }
-
-        ul {
-            list-style-type: none; /* Remove marcadores de lista */
-            padding: 0; /* Remove preenchimento padrão */
-        }
-
-        li {
-            margin: 5px 0; /* Espaçamento entre mensagens */
-            text-align: center;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Agendar Consulta com o Dr. {{ doctor.name }}</h2>
+    <h2>Agendando consulta com</h2>
+    <div class="doctor-name">Dr. {{ doctor.name }}</div>
     
-    <form action="{{ url_for('schedule_appointment', doctor_id=doctor.id) }}" method="POST">
-        <label for="appointment_date">Selecione a data:</label>
-        <input type="date" name="appointment_date" required>
+    <form action="{{ url_for('schedule_appointment', doctor_id=doctor.id) }}" method="POST" onsubmit="return confirmAppointment();">
+        <label for="appointment_date">Selecione uma data:</label>
+        <input type="date" name="appointment_date" id="appointment_date" required>
+        
+        <div class="time-options" id="time-options">
+            <label>Selecione um horário:</label>
+            <!-- Horários disponíveis - esses horários podem ser gerados dinamicamente -->
+            {% for time in ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"] %}
+            <span class="time-option" onclick="selectTime('{{ time }}')">{{ time }}</span>
+            {% endfor %}
+        </div>
+        
+        <input type="hidden" name="appointment_time" id="appointment_time">
+        
+        <div class="confirmation" id="confirmation-message"></div>
+        
         <input type="submit" value="Agendar Consulta">
     </form>
-
-    <!-- Mensagens de flash -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <ul>
-        {% for category, message in messages %}
-        <li class="flash {{ category }}">{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
 </div>
+
+<script>
+    let selectedDate = "";
+    let selectedTime = "";
+
+    document.getElementById('appointment_date').addEventListener('change', function() {
+        selectedDate = this.value;
+        document.getElementById('time-options').style.display = 'grid';
+    });
+
+    function selectTime(time) {
+        selectedTime = time;
+        document.getElementById('appointment_time').value = time;
+
+        // Update confirmation message
+        const confirmationMessage = document.getElementById('confirmation-message');
+        confirmationMessage.innerText = `Confirme a data e horário: ${selectedDate} ${selectedTime}`;
+        confirmationMessage.style.display = 'block';
+        
+        // Remove highlight from other options
+        document.querySelectorAll('.time-option').forEach(option => {
+            option.style.backgroundColor = 'var(--primary-color)';
+        });
+        
+        // Highlight selected option
+        event.target.style.backgroundColor = 'var(--secondary-color)';
+    }
+
+    function confirmAppointment() {
+        if (!selectedDate || !selectedTime) {
+            alert("Por favor, selecione uma data e horário.");
+            return false;
+        }
+        const appointmentDatetimeStr = `${selectedDate} ${selectedTime}`;
+        return confirm(`Deseja agendar para: ${appointmentDatetimeStr}?`);
+    }
+</script>
 
 </body>
 </html>

@@ -64,7 +64,7 @@
     <div class="appointments-container">
         {% for appointment in appointments %}
             <a href="{{ url_for('rate_doctor', doctor_id=appointment.doctor.id) }}" class="doctor-btn">
-                {{ appointment.doctor.name }} - {{ appointment.appointment_date.strftime('%d/%m/%Y') }}
+                {{ appointment.doctor.name }} - {{ appointment.appointment_datetime.strftime('%d/%m/%Y %H:%M') }}
             </a>
         {% endfor %}
     </div>
