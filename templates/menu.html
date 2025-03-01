@@ -21,6 +21,7 @@
         margin: 0;
       }
 
+      /* Sidebar Styling */
       .sidebar {
         background-color: var(--primary-color);
         width: 300px;
@@ -67,12 +68,14 @@
         color: var(--text-color);
       }
 
+      /* Main Content Styling */
       .main-content {
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         width: 100%;
+        position: relative;
       }
 
       .main-content .header {
@@ -117,11 +120,27 @@
       }
 
       .main-content .menu-buttons button:hover {
-        background-color: #45b580; /* Cor para o hover */
+        background-color: #45b580;
+      }
+
+      /* Profile Icon Styling */
+      .profile-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        cursor: pointer;
+      }
+
+      .profile-icon img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
       }
     </style>
   </head>
   <body>
+    <!-- Sidebar -->
     <div class="sidebar">
       <div class="header">
         <span>M</span>ED.ai
@@ -136,7 +155,14 @@
         {% endfor %}
       </div>
     </div>
+
+    <!-- Main Content -->
     <div class="main-content">
+      <div class="profile-icon">
+        <a href="{{ url_for('profile') }}">
+          <img src="data:image/png;base64,{{ current_user.profile_picture|b64encode }}" alt="Profile Icon">
+        </a>
+      </div>
       <div class="header">
         <span>M</span>ED.ai
       </div>
@@ -144,16 +170,15 @@
         Olá <span>{{ current_user.name }}</span>! Selecione uma opção abaixo:
       </div>
       <div class="menu-buttons">
-        <!-- Botão de Marcar Consulta -->
+        <!-- Schedule Appointment Button -->
         <button onclick="location.href='{{ url_for('select_doctor') }}'">Marcar consulta</button>
   
-        <!-- Botão de Opinar sobre Médico -->
-        <button onclick="location.href='{{ url_for('select_doctor_for_rating')}}'">Opinar sobre Médico</button>
+        <!-- Rate Doctor Button -->
+        <button onclick="location.href='{{ url_for('select_doctor_for_rating') }}'">Opinar sobre Médico</button>
   
-        <!-- Botão de Logout -->
+        <!-- Logout Button -->
         <button onclick="location.href='{{ url_for('logout') }}'">Log Out</button>
       </div>
     </div>
   </body>
 </html>
-

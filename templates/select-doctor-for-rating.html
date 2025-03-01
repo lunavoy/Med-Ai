@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selecione um Médico para Avaliar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+        table {
+            width: 100%;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #57c289;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Selecione um Médico para Avaliar</h1>
+        <table>
+            <tr>
+                <th>Data</th>
+                <th>Médico</th>
+                <th>Avaliar</th>
+            </tr>
+            {% for appointment in appointments %}
+            <tr>
+                <td>{{ appointment.appointment_datetime.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>{{ appointment.doctor.name }}</td>
+                <td><a href="{{ url_for('rate_doctor', appointment_id=appointment.id) }}">Avaliar</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>

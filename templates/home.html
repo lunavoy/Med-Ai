@@ -1,112 +1,107 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MED.ai - Home</title>
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-      rel="stylesheet"
-    />
+    <title>Med.ai - Menu Principal</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-      :root {
-        --primary-color: #64d79a;
-        --secondary-color: #57c289;
-        --background-color: #f4f4f4;
-        --text-color: #333;
-      }
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://images.unsplash.com/photo-1616243125617-1b6240f933c2?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            text-align: center;
+        }
 
-      body {
-        font-family: Arial, sans-serif;
-        background: var(--background-color);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-      }
+        .home-container {
+            background-color: rgba(100, 215, 154, 0.85);
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
 
-      .container {
-        background: var(--primary-color);
-        padding: 30px;
-        border-radius: 15px;
-        text-align: center;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        width: 300px;
-      }
+        .logo {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
 
-      .header {
-        font-size: 48px;
-        font-weight: bold;
-        margin-bottom: 40px;
-        color: var(--text-color);
-      }
+        .welcome-message {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
 
-      .header span {
-        color: var(--secondary-color);
-      }
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            gap: 10px;
+            text-decoration: none;
+        }
 
-      .menu-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-      }
+        .btn-login {
+            background-color: white;
+            color: #64d79a;
+        }
 
-      .menu-buttons a {
-        width: 100%;
-        padding: 15px;
-        text-align: center;
-        border-radius: 5px;
-        background-color: var(--secondary-color);
-        text-decoration: none;
-        color: white;
-        font-size: 18px;
-        font-weight: bold;
-        transition: background-color 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-      }
+        .btn-login:hover {
+            background-color: #f0f0f0;
+        }
 
-      .menu-buttons a:hover {
-        background-color: var(--primary-color);
-      }
+        .btn-signup {
+            background-color: #50c48a;
+            color: white;
+        }
 
-      .menu-buttons i {
-        font-size: 20px;
-      }
+        .btn-signup:hover {
+            background-color: #45b07a;
+        }
 
-      .menu-buttons .login-btn i {
-        color: white;
-      }
-
-      .menu-buttons .register-btn i {
-        color: white;
-      }
+        .btn i {
+            margin-right: 8px;
+        }
     </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="header">
-        <span>Med</span>.Ai
-      </div>
-
-      <div class="menu-buttons">
-        <!-- Redireciona para a página de login -->
-        <a href="{{ url_for('login') }}" class="login-btn">
-          <i class="fas fa-sign-in-alt"></i>
-          Login
+</head>
+<body>
+    <div class="home-container">
+        <div class="logo">
+            <i class="fas fa-notes-medical"></i>Med.ai
+        </div>
+        <div class="welcome-message">
+            Bem-vindo ao Med.ai, sua plataforma inteligente de gestão médica. 
+            Simplifique seu atendimento, organize seus pacientes e melhore 
+            a eficiência do seu consultório.
+        </div>
+        <a href="{{ url_for('login') }}" class="btn btn-login">
+            <i class="fas fa-sign-in-alt"></i>Fazer Login
         </a>
-
-        <!-- Redireciona para a página de cadastro -->
-        <a href="{{ url_for('register') }}" class="register-btn">
-          <i class="fas fa-user-plus"></i>
-          Register
+        <a href="{{ url_for('register') }}" class="btn btn-signup">
+            <i class="fas fa-user-plus"></i>Criar Conta
         </a>
-      </div>
     </div>
-  </body>
+</body>
 </html>
-
-

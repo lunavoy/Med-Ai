@@ -2,12 +2,14 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy import Column, Integer, Date, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, Date, ForeignKey, String, Float, LargeBinary, update
+from sqlalchemy.orm import relationship, aliased, joinedload
 from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
+from sqlalchemy.exc import IntegrityError
 import os
-import datetime
+from datetime import datetime
+from base64 import b64encode
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -20,18 +22,24 @@ migrate = Migrate(app, db)
 #-----------------------------------Tabelas--------------------------------------------------
 class Patient(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), nullable=False, unique=True)
+    username = db.Column(db.String(20), nullable=False)
     name = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(12), nullable=False)
+    date_of_birth = db.Column(Date)
+    gender = db.Column(String(10))
+    weight = db.Column(Float)
+    height = db.Column(Float)
+    profile_picture = db.Column(LargeBinary)
 
 class Doctor(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     password = db.Column(db.String, nullable=False)
-    username = db.Column(db.String(20), nullable=False, unique=True)
+    username = db.Column(db.String(20), nullable=False)
     name = db.Column(db.String(50), nullable=False)
     specialty = db.Column(db.String(30), nullable=False)
     crm = db.Column(db.String(6), nullable=False)
     estado = db.Column(db.String(30), nullable=False, default="")
+    profile_picture = db.Column(LargeBinary)
 
 class Appointment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -42,17 +50,19 @@ class Appointment(db.Model):
     patient = db.relationship('Patient', backref='appointments')
     doctor = db.relationship('Doctor', backref='appointments')
 
-    __table_args__ = (db.UniqueConstraint('doctor_id', 'appointment_datetime', name='_appointment_datetime_doctor_id_uc'),)
-
-class DoctorRating(db.Model):
+class Rating(db.Model):
+    tablename = 'rating'
     id = db.Column(db.Integer, primary_key=True)
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
     rating = db.Column(db.Integer, nullable=False)
-    review = db.Column(db.String(500), nullable=True)
-    
+    review = db.Column(db.String(500), nullable=True, default="")
+
 with app.app_context():
-   db.create_all()
+    new_appointment = Appointment(patient_id=1, doctor_id=2, appointment_datetime=datetime.today().replace(hour=19, minute=0, second=0))
+    db.session.add(new_appointment)
+    db.session.commit()
+    db.create_all()
     #db.create_all() # Doctor.__table__.drop(db.engine)
 #------------------------------------------------------------------------------ROTAS(URL)-----------------------------------------------------------------------
 @login_manager.user_loader
@@ -90,7 +100,6 @@ def register():
             new_user = Patient(username=username, name=name, password=hashed_password)
             db.session.add(new_user)
             db.session.commit()
-            flash('Cadastro de paciente realizado com sucesso!')
             return redirect(url_for('login'))
 
         # Doctor Registration
@@ -121,8 +130,7 @@ def register():
             return redirect(url_for('login'))
 
     return render_template('register.html')
-    
-    
+        
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -135,12 +143,10 @@ def login():
         if patient and check_password_hash(patient.password, password):
             login_user(patient)
             session['user_type'] = 'patient'
-            flash("Login realizado com sucesso.")
             return redirect(url_for('menu'))
         elif doctor and check_password_hash(doctor.password, password):
             login_user(doctor)
             session['user_type'] = 'doctor'
-            flash("Login realizado com sucesso.")
             return redirect(url_for('dashboard_doctor'))
         else:
             flash("Username ou senha incorretos.")
@@ -154,6 +160,7 @@ def logout():
     session.pop('user_type', None)
     flash('Logout realizado com sucesso.')
     return redirect(url_for('login'))
+
 @app.route('/menu')
 @login_required
 def menu():
@@ -161,7 +168,7 @@ def menu():
         abort(403)  # Restrict access if not a patient
     upcoming_appointments = Appointment.query.filter(
         Appointment.patient_id == current_user.id,
-        Appointment.appointment_datetime >= datetime.date.today()
+        Appointment.appointment_datetime >= datetime.today()
     ).order_by(Appointment.appointment_datetime).all()
     return render_template('menu.html', upcoming_appointments=upcoming_appointments)
 
@@ -170,12 +177,12 @@ def menu():
 def dashboard_doctor():
     upcoming_appointments = Appointment.query.filter(
         Appointment.doctor_id == current_user.id,
-        Appointment.appointment_datetime >= datetime.date.today()
+        Appointment.appointment_datetime >= datetime.today()
     ).order_by(Appointment.appointment_datetime).all()
 
-    ratings = DoctorRating.query.filter_by(doctor_id=current_user.id).all()
+    ratings = Rating.query.filter_by(doctor_id=current_user.id).all()
     average_rating = sum(r.rating for r in ratings) / len(ratings) if ratings else None
-    latest_reviews = DoctorRating.query.filter_by(doctor_id=current_user.id).order_by(DoctorRating.id.desc()).limit(5).all()
+    latest_reviews = Rating.query.filter_by(doctor_id=current_user.id).order_by(Rating.id.desc()).limit(5).all()
 
     if 'logout' in request.args:
         logout_user()
@@ -187,7 +194,8 @@ def dashboard_doctor():
         doctor=current_user,
         appointments=upcoming_appointments,
         average_rating=average_rating,
-        reviews=latest_reviews
+        reviews=latest_reviews,
+        patient_names={a.patient_id: a.patient.name for a in upcoming_appointments}
     )
 
 @app.route('/select-doctor', methods=['GET', 'POST'])
@@ -208,8 +216,9 @@ def select_doctor():
     
     # Renderiza a página de seleção de especialidades sem médicos selecionados inicialmente
     return render_template('select_doctor.html', specialties=specialties)
+
 @app.route('/schedule_appointment/<int:doctor_id>', methods=['GET', 'POST'])
-@login_required  # O paciente precisa estar logado
+@login_required
 def schedule_appointment(doctor_id):
     doctor = Doctor.query.get_or_404(doctor_id)  # Busca o médico pelo ID
     
@@ -220,12 +229,12 @@ def schedule_appointment(doctor_id):
         
         appointment_datetime_str = appointment_datetime_str.replace('None ', '')  # Tira o 'None' do come o da string
         try:
-            appointment_datetime = datetime.datetime.strptime(appointment_datetime_str, '%Y-%m-%d %H:%M')
+            appointment_datetime = datetime.strptime(appointment_datetime_str, '%Y-%m-%d %H:%M')
         except ValueError:
             flash('Formato de data ou hora inválido. Use o formato aaaa-mm-dd HH:MM.', 'error')
             return redirect(url_for('schedule_appointment', doctor_id=doctor_id))
 
-        if appointment_datetime < datetime.datetime.now():  # data e hora no passado = error
+        if appointment_datetime < datetime.now():
             flash('A data e hora selecionadas são no passado. Escolha uma data futura.', 'error')
             return redirect(url_for('schedule_appointment', doctor_id=doctor_id))
 
@@ -253,86 +262,93 @@ def schedule_appointment(doctor_id):
 
     available_times = [f"{hour}:00" for hour in range(8, 19)]  # Horários disponíveis das 8 às 18
     return render_template('schedule_appointment.html', doctor=doctor, available_times=available_times)
-@app.route('/select-doctor-for-rating')
+
+@app.route('/select-doctor-for-rating', methods=['GET'])
 @login_required
 def select_doctor_for_rating():
     patient_id = current_user.id
-    today = datetime.date.today()
 
-    # Consultas anteriores ou na data atual, onde ainda não há avaliação
-    appointments = (
-        Appointment.query
-        .filter(
-            Appointment.patient_id == patient_id,
-            Appointment.appointment_datetime <= today
-        )
-        .outerjoin(DoctorRating, DoctorRating.doctor_id == Appointment.doctor_id)
-        .filter(DoctorRating.id.is_(None))  # Exclui consultas já avaliadas
-        .all()
-    )
+    # Retrieve appointments for the logged-in patient that are eligible for rating
+    appointments = Appointment.query.filter(
+        Appointment.patient_id == patient_id,
+        Appointment.appointment_datetime < datetime.now()
+    ).all()
 
-    return render_template('select_doctor_for_rating.html', appointments=appointments)
-@app.route('/rate-doctor/<int:doctor_id>', methods=['GET', 'POST'])
+    return render_template('select-doctor-for-rating.html', appointments=appointments)
+
+@app.route('/rate-doctor/<int:appointment_id>', methods=['GET', 'POST'])
 @login_required
-def rate_doctor(doctor_id):
-    doctor = Doctor.query.get_or_404(doctor_id)  # Busca o médico pelo ID
-    patient_id = current_user.id  # ID do paciente logado
-    
+def rate_doctor(appointment_id):
+    appointment = Appointment.query.get_or_404(appointment_id)
+    if appointment.patient_id != current_user.id:
+        abort(403)
+
     if request.method == 'POST':
-        # Valida e converte a nota
+        rating_value = request.form.get('rating')
+        review = request.form.get('review', '')
+
+        # Criar nova avaliação
+        new_rating = Rating(
+            doctor_id=appointment.doctor_id,
+            patient_id=current_user.id,
+            rating=int(rating_value),
+            review=review
+        )
+        db.session.add(new_rating)
+        db.session.commit()
+
+        flash("Avaliação enviada com sucesso!", "success")
+        return redirect(url_for('select_doctor_for_rating'))
+
+    doctor = Doctor.query.get(appointment.doctor_id)
+    return render_template('rate_doctor.html', doctor=doctor, appointment=appointment)
+
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        # Update fields
         try:
-            rating = int(request.form['rating'])
-            if rating < 1 or rating > 5:
-                flash('A nota deve ser entre 1 e 5.', 'danger')
-                return redirect(url_for('rate_doctor', doctor_id=doctor_id))
+            current_user.date_of_birth = datetime.strptime(request.form.get('date_of_birth'), '%Y-%m-%d').date()
         except ValueError:
-            flash('A nota deve ser um número entre 1 e 5.', 'danger')
-            return redirect(url_for('rate_doctor', doctor_id=doctor_id))
+            flash('Data de nascimento em formato inválido', 'danger')
+            return redirect(url_for('profile'))
+        current_user.gender = request.form.get('gender')
 
-        review = request.form.get('review')
+        # Only request weight and height if user is not a doctor
+        if not hasattr(current_user, 'crm'):
+            try:
+                current_user.weight = float(request.form.get('weight'))
+            except ValueError:
+                current_user.weight = None
+            try:
+                current_user.height = float(request.form.get('height'))
+            except ValueError:
+                current_user.height = None
+
+        # Handle profile picture upload
+        profile_pic = request.files.get('profile_picture')
+        if profile_pic:
+            filename = secure_filename(profile_pic.filename)
+            current_user.profile_picture = profile_pic.read()
         
-        # Verifica se existe uma consulta passada ou atual sem avaliação
-        appointment = Appointment.query.filter(
-            Appointment.patient_id == patient_id,
-            Appointment.doctor_id == doctor_id,
-            Appointment.appointment_datetime <= datetime.date.today()
-        ).first()
+        # Save to database
+        db.session.commit()
+        flash('Profile updated successfully', 'success')
+        return redirect(url_for('profile'))
+    return render_template('profile.html')
 
-        existing_rating = DoctorRating.query.filter_by(
-            doctor_id=doctor_id, 
-            patient_id=patient_id
-        ).first() if appointment else None
+@app.template_filter('b64encode')
+def b64encode_filter(data):
+    return b64encode(data).decode('utf-8') if data else ''
 
-        if appointment and not existing_rating:
-            # Cria a avaliação
-            new_rating = DoctorRating(
-                doctor_id=doctor_id,
-                patient_id=patient_id,
-                rating=rating,
-                review=review
-            )
-            db.session.add(new_rating)
-            db.session.commit()
-            flash('Avaliação submetida com sucesso!', 'success')
-            return redirect(url_for('menu'))
-        else:
-            flash('Você não pode avaliar este médico ou a consulta já foi avaliada.', 'danger')
-
-    return render_template('rate_doctor.html', doctor=doctor)
-
-@app.route('/check-data', methods=['GET'])
+@app.route('/check-data')
 def check_data():
-    data = []
-    for table in db.metadata.sorted_tables:
-        table_data = []
-        for row in db.session.query(table).all():
-            row_data = {c.name: getattr(row, c.name) for c in table.columns}
-            table_data.append(row_data)
-        data.append({table.name: table_data})
-    return jsonify(data)
-
-
+    users = Patient.query.all()
+    doctors = Doctor.query.all()
+    appointments = Appointment.query.all()
+    ratings = Rating.query.all()
+    return render_template('check_data.html', users=users, doctors=doctors, appointments=appointments, ratings=ratings)
 
 if __name__ == '__main__':
     app.run(debug=True)
-

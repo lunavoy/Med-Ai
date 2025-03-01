@@ -6,79 +6,106 @@
     <title>Cadastro - MED.ai</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+            background-color: #64d79a; /* Mudança para o verde solicitado */
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            color: #333;
         }
+    
         .container {
             background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 350px;
             text-align: center;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1;
         }
+    
         h2 {
-            font-size: 24px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #64d79a;
+            margin-bottom: 30px;
+        }
+    
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
             margin-bottom: 20px;
         }
-        .highlight {
-            color: #64d79a;
+    
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #64d79a;
         }
-        input[type="text"], input[type="password"], select {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
+    
         input[type="submit"] {
             width: 100%;
-            padding: 10px;
-            background-color: #e6f9eb;
-            color: black;
-            border: 1px solid #64d79a;
-            border-radius: 4px;
+            padding: 12px;
+            background-color: #64d79a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
             cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
         }
+    
         input[type="submit"]:hover {
-            background-color: #d1f1d8;
+            background-color: #50c48a;
         }
+    
         a {
             display: block;
             margin-top: 10px;
+            font-size: 1rem;
             color: #64d79a;
             text-decoration: none;
+            transition: color 0.3s;
         }
+    
         a:hover {
-            text-decoration: underline;
+            color: #50c48a;
         }
-        .logo {
-            font-size: 30px;
-            color: #64d79a;
-            font-weight: bold;
-            margin-bottom: 30px;
-        }
+    
         .btn-option {
             display: flex;
             justify-content: space-around;
             margin: 20px 0;
         }
+    
         .btn-option button {
-            padding: 10px 20px;
+            padding: 12px 20px;
             background-color: #64d79a;
             color: white;
-            border-radius: 4px;
+            border-radius: 8px;
             border: none;
+            font-size: 1rem;
             cursor: pointer;
+            transition: all 0.3s;
         }
+    
         .btn-option button:hover {
-            background-color: #57c289;
+            background-color: #50c48a;
         }
+    
         .form-section {
             display: none;
             margin-top: 20px;
@@ -88,14 +115,14 @@
         function showForm(type) {
             document.getElementById('patient-form').style.display = 'none';
             document.getElementById('doctor-form').style.display = 'none';
-
+    
             if (type === 'patient') {
                 document.getElementById('patient-form').style.display = 'block';
             } else if (type === 'doctor') {
                 document.getElementById('doctor-form').style.display = 'block';
             }
         }
-    </script>
+    </script>    
 </head>
 <body>
 
@@ -222,22 +249,8 @@
             
             </form>
         </div>
-        
-
-        <!-- Links para login e página inicial -->
         <a href="{{ url_for('login') }}">Já tem uma conta? Faça login</a>
         <a href="{{ url_for('home') }}">Voltar ao Menu Principal</a>
     </div>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-
 </body>
 </html>

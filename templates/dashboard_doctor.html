@@ -99,6 +99,8 @@
                     {% for appointment in appointments %}
                         <a href="#" class="doctor-btn">
                             {{ appointment.appointment_datetime.strftime('%d/%m/%Y %H:%M') }}
+                            <br>
+                            Paciente: {{ appointment.patient.name }}
                         </a>
                     {% endfor %}
                 </div>
@@ -107,8 +109,6 @@
                 <div class="menu-buttons">
                     {% for review in reviews %}
                         <div class="review">
-                            <strong>{{ review.patient_name }}</strong>
-                            <div>{{ review.comment }}</div>
                             <div>{{ review.rating }} ★</div>
                         </div>
                     {% endfor %}
@@ -118,13 +118,14 @@
             <!-- Sessão da direita com perfil e média de notas -->
             <div class="right">
                 <div class="profile">
-                    {% if doctor.profile_image %}
-                        <img src="{{ url_for('static', filename='profile_images/' + doctor.profile_image) }}" alt="Foto de Perfil">
+                    {% if doctor.profile_picture %}
+                        <img src="data:image/png;base64,{{ doctor.profile_picture|b64encode }}" alt="Foto de Perfil">
                     {% else %}
                         <img src="{{ url_for('static', filename='profile_images/default.png') }}" alt="Foto de Perfil">
                     {% endif %}
                     <h3>Olá, Dr. {{ doctor.name }}!</h3>
                     <p>Sua nota atual: {{ average_rating or "N/A" }} ★</p>
+                    <a href="{{ url_for('profile') }}" class="doctor-btn">Meu perfil</a>
                     <a href="{{ url_for('logout') }}" class="doctor-btn">Sair (Logout)</a>
                 </div>
             </div>
@@ -132,4 +133,5 @@
     </div>
 </body>
 </html>
+
 
